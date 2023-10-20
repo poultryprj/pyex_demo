@@ -1,174 +1,184 @@
 ```markdown
-# PYEX
+# Excel API with Django
 
-## Excel Data API
+This is a simple Django API for creating, reading, updating, and deleting data in an Excel file. It provides endpoints to perform CRUD operations on data stored in an Excel spreadsheet.
 
-This is a Django API for creating, reading, updating, and deleting data in Excel files.
+## Getting Started
+
+To use this API, follow the instructions below:
 
 ### Prerequisites
 
-Before using this API, ensure you have the following:
+1. You need to have [Python](https://www.python.org/downloads/) installed on your system.
+2. Install the required Python packages using pip:
 
-- Python and Django installed.
-- Required Python libraries: openpyxl, pandas.
-- Excel file (main.xlsx) to store data.
+   ```bash
+   pip install django openpyxl djangorestframework pandas
+   ```
 
-### API Endpoints
+### Installation
 
-#### Create Data
+1. Clone this repository to your local machine.
 
-Create a new sheet and add data to it.
+   ```bash
+   git clone https://github.com/yourusername/excel-api.git
+   cd excel-api
+   ```
 
-**Request:**
+2. Create a virtual environment (optional but recommended).
 
-- Method: POST
-- URL: `/api/excel/sheet_name`
-- Body: JSON data with 'json_objects' containing an array of objects.
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+   ```
 
-Example:
-```json
+3. Migrate the database and start the Django development server.
+
+   ```bash
+   python manage.py migrate
+   python manage.py runserver
+   ```
+
+4. The API should now be accessible at `http://localhost:8000/`.
+
+## API Endpoints
+
+- `POST /api/excel/create/{sheet_name}`: Create new data in the Excel sheet.
+- `GET /api/excel/read/{sheet_name}`: Read data from the Excel sheet.
+- `PUT /api/excel/update/{sheet_name}`: Update existing data in the Excel sheet.
+- `DELETE /api/excel/delete/{sheet_name}`: Delete data from the Excel sheet.
+
+## Example Usage
+
+### Create Data (POST)
+
+```http
+POST /api/excel/create/mysheetname
+Content-Type: application/json
+
 {
-  "json_objects": [
-    {
-      "name": "John Doe",
-      "amount": 100,
-      "pending": false
-    },
-    {
-      "name": "Alice Smith",
-      "amount": 200,
-      "pending": true
-    }
-  ]
+    "json_objects": [
+        {
+            "name": "John Doe",
+            "amount": 100,
+            "pending": false
+        },
+        {
+            "name": "Alice Smith",
+            "amount": 200,
+            "pending": true
+        }
+    ]
 }
 ```
 
-**Response:**
+### Read Data (GET)
 
-The API responds with a success message:
+```http
+GET /api/excel/read/mysheetname
+```
 
-```json
+### Update Data (PUT)
+
+```http
+PUT /api/excel/update/mysheetname
+Content-Type: application/json
+
 {
-  "message": "Data created successfully"
+    "json_objects": [
+        {
+            "sr_no": 1,
+            "name": "Updated Name",
+            "amount": 300,
+            "pending": true
+        }
+    ]
 }
 ```
 
-#### Read Data
+### Delete Data (DELETE)
 
-Retrieve data from an existing sheet.
+```http
+DELETE /api/excel/delete/mysheetname
+Content-Type: application/json
 
-**Request:**
-
-- Method: GET
-- URL: `/api/excel/sheet_name`
-
-Example: GET `/api/excel/sales`
-
-**Response:**
-
-The API responds with the data from the sheet:
-
-```json
 {
-  "data": [
-    {
-      "sr_no": 1,
-      "name": "John Doe",
-      "amount": 100,
-      "pending": 50
-    },
-    {
-      "sr_no": 2,
-      "name": "Alice Smith",
-      "amount": 200,
-      "pending": 30
-    }
-  ]
+    "sr_no": 1
 }
 ```
 
-#### Update Data
+## Error Handling
 
-Update data in an existing sheet.
+The API provides error responses for various scenarios, such as invalid data, missing sheets, or failed operations. Be sure to check the response status and message for details.
 
-**Request:**
+## Contributing
 
-- Method: PUT
-- URL: `/api/excel/sheet_name`
-- Body: JSON data with 'json_objects' containing an array of objects. Each object should have 'sr_no' for identifying the row.
+Feel free to contribute to this project by opening issues, suggesting improvements, or submitting pull requests.
 
-Example:
-```json
-{
-  "json_objects": [
-    {
-      "sr_no": 1,
-      "name": "Updated Name",
-      "amount": 300,
-      "pending": 33
-    }
-  ]
-}
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 ```
 
-**Response:**
+Now, for a Postman example, you can use the following requests:
 
-The API responds with a success message:
+1. Create Data (POST):
 
-```json
-{
-  "message": "Data updated successfully"
-}
-```
+   - Method: POST
+   - URL: `http://localhost:8000/api/excel/create/mysheetname`
+   - Headers: `Content-Type: application/json`
+   - Body (raw JSON):
+     ```json
+     {
+         "json_objects": [
+             {
+                 "name": "John Doe",
+                 "amount": 100,
+                 "pending": false
+             },
+             {
+                 "name": "Alice Smith",
+                 "amount": 200,
+                 "pending": true
+             }
+         ]
+     }
+     ```
 
-#### Delete Data
+2. Read Data (GET):
 
-Clear data in an existing sheet.
+   - Method: GET
+   - URL: `http://localhost:8000/api/excel/read/mysheetname`
 
-**Request:**
+3. Update Data (PUT):
 
-- Method: DELETE
-- URL: `/api/excel/sheet_name`
+   - Method: PUT
+   - URL: `http://localhost:8000/api/excel/update/mysheetname`
+   - Headers: `Content-Type: application/json`
+   - Body (raw JSON):
+     ```json
+     {
+         "json_objects": [
+             {
+                 "sr_no": 1,
+                 "name": "Updated Name",
+                 "amount": 300,
+                 "pending": true
+             }
+         ]
+     }
+     ```
 
-Example:
-```json
-{
-   "sr_no" : 1
-}
-```
+4. Delete Data (DELETE):
 
-**Response:**
+   - Method: DELETE
+   - URL: `http://localhost:8000/api/excel/delete/mysheetname`
+   - Headers: `Content-Type: application/json`
+   - Body (raw JSON):
+     ```json
+     {
+         "sr_no": 1
+     }
+     ```
 
-The API responds with a success message:
-
-```json
-{
-  "message": "Data deleted successfully"
-}
-```
-
-### File Path
-
-Replace the `file_path` in views.py with the actual path to your Excel file.
-
-### Usage
-
-1. Run the Django development server.
-2. Use an API client or a tool like `curl` to make requests to the API endpoints.
-3. Monitor responses and handle errors.
-
-### Error Handling
-
-- HTTP 400: Bad Request - Missing or invalid data.
-- HTTP 404: Not Found - The requested sheet does not exist.
-- HTTP 500: Internal Server Error - Unexpected server issues.
-
-### License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-### Acknowledgments
-
-- [Django](https://www.djangoproject.com/)
-- [openpyxl](https://openpyxl.readthedocs.io/en/stable/)
-- [pandas](https://pandas.pydata.org/)
+You can import these requests into Postman and use them to interact with your API. Make sure to adjust the URLs and request data as needed for your specific use case.

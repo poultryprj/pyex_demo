@@ -8,6 +8,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from rest_framework import status
 import pandas as pd
 
+
 @api_view(['POST'])
 def excel_view(request, sheet_name):
     if request.method == 'POST':
@@ -16,7 +17,7 @@ def excel_view(request, sheet_name):
             json_objects = data.get('json_objects')
 
             # Provide the full path to your Excel file
-            file_path = r'C:\Users\99ksh\OneDrive\Documents\Desktop\PYEX_01\main.xlsx'
+            file_path = r'main.xlsx'
 
             if not json_objects:
                 return JsonResponse({"error": "JSON objects are required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -32,7 +33,8 @@ def excel_view(request, sheet_name):
                 sheet = workbook[sheet_name]
 
             # Get the last sr_no in the sheet
-            last_sr_no = max([row[0] for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, values_only=True)], default=0)
+            last_sr_no = max([row[0] for row in sheet.iter_rows(
+                min_row=2, max_row=sheet.max_row, values_only=True)], default=0)
 
             # Initialize sr_no to the next number
             sr_no = last_sr_no + 1
@@ -50,11 +52,12 @@ def excel_view(request, sheet_name):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @api_view(['GET'])
 def read_excel(request, sheet_name):
     try:
         # Provide the full path to your Excel file
-        file_path = r'C:\Users\99ksh\OneDrive\Documents\Desktop\PYEX_01\main.xlsx'
+        file_path = r'main.xlsx'
 
         # Load the Excel workbook using openpyxl
         workbook = load_workbook(filename=file_path)
@@ -79,7 +82,8 @@ def read_excel(request, sheet_name):
             return JsonResponse({'error': 'Sheet not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
+
 @api_view(['PUT'])
 def update_excel(request, sheet_name):
     if request.method == 'PUT':
@@ -88,7 +92,7 @@ def update_excel(request, sheet_name):
             json_objects = data.get('json_objects')
 
             # Provide the full path to your Excel file
-            file_path = r'C:\Users\99ksh\OneDrive\Documents\Desktop\PYEX_01\main.xlsx'
+            file_path = r'main.xlsx'
 
             if not json_objects:
                 return JsonResponse({"error": "JSON objects are required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -134,35 +138,42 @@ def update_excel(request, sheet_name):
             return JsonResponse({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
-
-
 @api_view(['DELETE'])
 def delete_excel(request, sheet_name):
     if request.method == 'DELETE':
         try:
             # Provide the full path to your Excel file
-            file_path = r'C:\Users\99ksh\OneDrive\Documents\Desktop\PYEX_01\main.xlsx'
-            
+            file_path = r'main.xlsx'
+
             # Load the Excel workbook using openpyxl
             workbook = load_workbook(filename=file_path)
 
             if sheet_name in workbook.sheetnames:
                 sheet = workbook[sheet_name]
 
-                # Find the last row with data
-                last_row = sheet.max_row
+                # Get the sr_no to be deleted from the request data
+                data = json.loads(request.body.decode("utf-8"))
+                sr_no_to_delete = data.get('sr_no')
 
-                if last_row > 1:
-                    # Clear the data in the sheet, leaving only the header row
-                    for row in sheet.iter_rows(min_row=2, max_row=last_row):
-                        for cell in row:
-                            cell.value = None
+                if sr_no_to_delete is None:
+                    return JsonResponse({'error': 'sr_no is required for row deletion'}, status=status.HTTP_400_BAD_REQUEST)
+
+                found = False
+
+                # Find and delete the row with the matching sr_no
+                for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row):
+                    if row[0].value == sr_no_to_delete:
+                        sheet.delete_rows(row[0].row)
+                        found = True
+                        break
+
+                if not found:
+                    return JsonResponse({'error': f"Row with sr_no {sr_no_to_delete} not found"}, status=status.HTTP_404_NOT_FOUND)
 
                 # Save the updated Excel file
                 workbook.save(file_path)
 
-                return JsonResponse({'message': 'Data deleted successfully'}, status=status.HTTP_200_OK)
+                return JsonResponse({'message': 'Row deleted successfully'}, status=status.HTTP_200_OK)
             else:
                 return JsonResponse({'error': 'Sheet not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
